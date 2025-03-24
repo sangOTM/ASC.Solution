@@ -1,4 +1,4 @@
-﻿using ASC.Solution.Configuration;
+using ASC.Solution.Configuration;
 using ASC.Solution.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -10,49 +10,24 @@ using ASC.DataAccess;
 using ASC.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+var connectionString = builder.Configuration.GetConnectionString("ASCWebContextConnection") ?? throw new InvalidOperationException("Connection string 'ASCWebContextConnection' not found."); ;
 
-// Lấy connection string
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+builder.Services.AddDbContext<ASCWebContext>(options => options.UseSqlServer(connectionString));
 
-// Đăng ký DbContext
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+//builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ASCWebContext>();
 
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+builder.Services
+       .AddConfig(builder.Configuration)
+       .AddMyDependencyGroup();
 
-// Đăng ký Identity
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
-{
-    options.User.RequireUniqueEmail = true;
-})
-.AddEntityFrameworkStores<ApplicationDbContext>()
-.AddDefaultTokenProviders();
-
-// Đăng ký DbContext (scoped)
-builder.Services.AddScoped<DbContext, ApplicationDbContext>();
-
-// Đăng ký AppSettings
-builder.Services.AddOptions();
-builder.Services.Configure<ApplicationSettings>(builder.Configuration.GetSection("AppSettings"));
-
-// Đăng ký Session (nếu muốn dùng session)
+// Add services for session and caching
+builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    // Cấu hình session tùy nhu cầu
-    options.IdleTimeout = TimeSpan.FromMinutes(20);
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
 });
-
-// Đăng ký các dịch vụ khác
-builder.Services.AddControllersWithViews();
-builder.Services.AddTransient<IEmailSender, AuthMessageSender>();
-builder.Services.AddTransient<ISmsSender, AuthMessageSender>();
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddSingleton<IIdentitySeed, IdentitySeed>();
-
-// Đăng ký Razor Pages
-builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
@@ -69,15 +44,15 @@ else
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 
-// Sử dụng Session Middleware
+// Enable session before authorization
 app.UseSession();
-
-// Sử dụng Authentication & Authorization
-app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "areaRoute",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}");
 
 app.MapControllerRoute(
     name: "default",
@@ -85,15 +60,14 @@ app.MapControllerRoute(
 
 app.MapRazorPages();
 
-// Seed dữ liệu mặc định cho Identity
+// Seed user data
 using (var scope = app.Services.CreateScope())
 {
     var storageSeed = scope.ServiceProvider.GetRequiredService<IIdentitySeed>();
     await storageSeed.Seed(
         scope.ServiceProvider.GetService<UserManager<IdentityUser>>(),
         scope.ServiceProvider.GetService<RoleManager<IdentityRole>>(),
-        scope.ServiceProvider.GetService<IOptions<ApplicationSettings>>()
-    );
+        scope.ServiceProvider.GetService<IOptions<ApplicationSettings>>());
 }
 
 app.Run();

@@ -28,6 +28,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
@@ -36,6 +37,11 @@
     <ProjectReference Include="D:\TH_TKPM\ASC.Web\ASC.DataAccess\ASC.DataAccess.csproj" />
     <ProjectReference Include="D:\TH_TKPM\ASC.Web\ASC.Model\ASC.Model.csproj" />
     <ProjectReference Include="D:\TH_TKPM\ASC.Web\ASC.Utilities\ASC.Utilities.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Areas\ServiceRequestt\Data\" />
+    <Folder Include="Areas\ServiceRequestt\Models\" />
   </ItemGroup>
 
 </Project>
