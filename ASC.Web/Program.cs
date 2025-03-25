@@ -69,5 +69,10 @@ using (var scope = app.Services.CreateScope())
         scope.ServiceProvider.GetService<RoleManager<IdentityRole>>(),
         scope.ServiceProvider.GetService<IOptions<ApplicationSettings>>());
 }
+using (var scope = app.Services.CreateScope())
+{
+    var navigationCacheOperations = scope.ServiceProvider.GetRequiredService<INavigationCacheOperations>();
+    await navigationCacheOperations.CreateNavigationCacheAsync();
+}
 
 app.Run();

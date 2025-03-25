@@ -62,7 +62,7 @@ namespace ASC.Web.Services
             services.AddSession();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddDistributedMemoryCache();
-          //  services.AddSingleton<INavigationCacheOperations, NavigationCacheOperations>();
+            services.AddSingleton<INavigationCacheOperations, NavigationCacheOperations>();
             //Add RazorPages, MVC
 
             services.AddRazorPages();
