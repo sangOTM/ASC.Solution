@@ -135,7 +135,7 @@ namespace ASC.Web.Areas.Accounts.Controllers
 
         await _emailSender.SendEmailAsync(reg.Email, subject, body);
 
-        return RedirectToAction(nameof(ServiceEngineers));
+        return RedirectToAction("ServiceEngineer");
     }
         [HttpGet]
         public async Task<IActionResult> Customers()
@@ -193,7 +193,7 @@ namespace ASC.Web.Areas.Accounts.Controllers
                 await _emailSender.SendEmailAsync(reg.Email, subject, body);
             }
 
-            return RedirectToAction(nameof(Customers));
+            return RedirectToAction("Customers");
         }
     }
 }
