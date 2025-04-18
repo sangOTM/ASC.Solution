@@ -1,4 +1,4 @@
-﻿using ASC.DataAccess.Interfaces;
+using ASC.DataAccess.Interfaces;
 using ASC.DataAccess;
 using ASC.Solution.Configuration;
 using ASC.Solution.Data;
@@ -6,6 +6,9 @@ using ASC.Solution.Services;
 using ASC.Web.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using ASC.Business.Interfaces;
+using ASC.Business;
+
 
 namespace ASC.Web.Services
 {
@@ -27,6 +30,15 @@ namespace ASC.Web.Services
             services.AddOptions(); // 10ption
 
             services.Configure<ApplicationSettings>(config.GetSection("AppSettings"));
+
+            // Using a Gmail Authentication Provider for Customer Authentication
+            services.AddAuthentication()
+                .AddGoogle(options =>
+                {
+                    IConfigurationSection googleAuthNSection = config.GetSection("Authentication:Google");
+                    options.ClientId = config["Google:Identity:ClientId"];
+                    options.ClientSecret = config["Google:Identity:ClientSecret"];
+                });
 
             return services;
 
@@ -69,6 +81,10 @@ namespace ASC.Web.Services
             services.AddDatabaseDeveloperPageExceptionFilter();
 
             services.AddControllersWithViews();
+            //Add MasterDataOperations
+            services.AddScoped<IMasterDataOperations, MasterDataOperations>();
+            services.AddAutoMapper(typeof(ApplicationDbContext));
+            //
 
             return services;
         }
